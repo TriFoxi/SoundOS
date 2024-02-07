@@ -24,10 +24,10 @@ namespace Song_Player
                 player.Open(new Uri(activeSong.ReturnFileName())); 
             }
         }
-        public void LoadPlaylist(Playlist pl)
+        public void LoadPlaylist(Playlist pl, bool all = false)
         {
             activePlaylist = pl;
-            activeSongIndex = -1;
+            activeSongIndex = (all) ? 0 : -1;
             TrackSwitch(true);
             PlayAudio(true);
         }
