@@ -23,16 +23,16 @@ namespace Song_Player
     /// </summary>
     public partial class MainWindow : Window
     {
-        public int highestPlaylistID = 0;
-        public int activePlaylistID = 0;
-        public int activePlaylistIndex = 0;
-        public Playlist activePlaylist = new Playlist();
+        private int activePlaylistIndex = 0;
 
-        public List<Playlist> allPlaylists = new List<Playlist>();
-        public List<Song> allSongs = new List<Song>();
+        private Playlist activePlaylist = new Playlist();
+        private Player player = new Player();
 
-        public string SONGSPATH = "/VS/Song Player/Files/Songs/";
-        public string PLPATH = "/VS/Song Player/Files/Playlists/";
+        private List<Playlist> allPlaylists = new List<Playlist>();
+        private List<Song> allSongs = new List<Song>();
+
+        private string SONGSPATH = "D:/VS/Song Player/Files/Songs/";
+        private string PLPATH = "D:/VS/Song Player/Files/Playlists/";
 
         //Utilities
         private string removeStrFromStart(string basic, string toRemove)
@@ -142,7 +142,28 @@ namespace Song_Player
             }
         }
 
-        //Main <3
+        //Player controls
+        private void SelectPlaylist()
+        {
+            player.LoadPlaylist(activePlaylist);
+            LoadActiveSongDetails();
+        }
+        private void Play(bool play)
+        {
+            player.PlayAudio(play);
+        }
+        private void SwitchTrack(bool forward)
+        {
+            player.TrackSwitch(forward);
+            LoadActiveSongDetails();
+        }
+        private void LoadActiveSongDetails()
+        {
+            SongName_Small.Text = player.activeSong.title;
+            SongArtist_Small.Text = player.activeSong.artist;
+        }
+
+        //Main
         public MainWindow()
         {
             Song owo = new Song();
@@ -159,7 +180,7 @@ namespace Song_Player
             UpdatePlaylistDisplay();
         }
 
-        //UI Elements
+        //UI Elements/Buttons
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             AllSongs_Panel.Text = "";
@@ -197,6 +218,18 @@ namespace Song_Player
             }
             UpdatePlaylistDisplay();
         }//Previous Playlist Button
+        private void PlayPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            SelectPlaylist();
+        }
+        private void SkipTrack_Button_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchTrack(true);
+        }
+        private void PreviousTrack_Button_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchTrack(false);
+        }
     }
 }
 //BONK <3
