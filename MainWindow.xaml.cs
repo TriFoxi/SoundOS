@@ -53,8 +53,6 @@ namespace Song_Player
         //Song Stuffs
         private void LoadSongs(string path)
         {
-            
-
             foreach (string filename in Directory.GetFiles(path, "*.mp3"))
             {
                 var mp3 = TagLib.File.Create(filename);
@@ -128,7 +126,7 @@ namespace Song_Player
 
             for (int i = 0; i < activePlaylist.playlist.Count; i++)
             {
-                SongList_PlaylistPanel.Text = SongList_PlaylistPanel.Text + activePlaylist.playlist[i].title + " || " + activePlaylist.playlist[i].artist + " | " + (Math.Round(allSongs[i].length / 60, 2)).ToString() + ":00\n";
+                SongList_PlaylistPanel.Text = SongList_PlaylistPanel.Text + activePlaylist.playlist[i].title + " || " + activePlaylist.playlist[i].artist + " | " + (Math.Round(activePlaylist.playlist[i].length / 60, 2)).ToString() + ":00\n";
             }
             PlaylistName_Panel.Text = activePlaylist.name;
             PlaylistAuthor_Panel.Text = activePlaylist.author;
@@ -143,10 +141,21 @@ namespace Song_Player
         }
 
         //Player controls
-        private void SelectPlaylist()
+        private void SelectPlaylist(bool all = false)
         {
-            player.LoadPlaylist(activePlaylist);
-            LoadActiveSongDetails();
+            switch (all)
+            {
+                case false:
+                    player.LoadPlaylist(activePlaylist);
+                    LoadActiveSongDetails();
+                    break;
+                case true:
+                    Playlist AllSongs = new Playlist();
+                    AllSongs.playlist = allSongs;
+                    player.LoadPlaylist(AllSongs, true);
+                    LoadActiveSongDetails();
+                    break;
+            }
         }
         private void Play(bool play)
         {
@@ -229,6 +238,10 @@ namespace Song_Player
         private void PreviousTrack_Button_Click(object sender, RoutedEventArgs e)
         {
             SwitchTrack(false);
+        }
+        private void PlayButton_AllSongs_Click(object sender, RoutedEventArgs e)
+        {
+            SelectPlaylist(true);
         }
     }
 }
