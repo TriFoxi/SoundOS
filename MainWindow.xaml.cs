@@ -87,6 +87,7 @@ namespace Song_Player
                     string requiredSong = "";
                     while (fails < 5 && !done)
                     {
+                        fail = false;
                         switch (fails)
                         {
                             case 0: requiredSong = SONGSPATH + contents[i]; break;
