@@ -51,11 +51,11 @@ namespace Song_Player
         }
 
         //Song Stuffs
-        private void LoadSongs()
+        private void LoadSongs(string path)
         {
             
 
-            foreach (string filename in Directory.GetFiles("/VS/Song Player/Files/Songs/", "*.mp3"))
+            foreach (string filename in Directory.GetFiles(path, "*.mp3"))
             {
                 var mp3 = TagLib.File.Create(filename);
                 string tempTitle = (mp3.Tag.Title != null) ? mp3.Tag.Title : removeStrFromStart(filename, SONGSPATH);
@@ -81,28 +81,41 @@ namespace Song_Player
                 for (int i = 2; i < contents.Count(); i++)
                 {
                     bool fail = false;
+                    int fails = 0;
                     bool done = false;
                     int j = 0;
-                    string requiredSong = SONGSPATH + contents[i];
-                    while (!done && !fail)
+                    string requiredSong = "";
+                    while (fails < 5 && !done)
                     {
-                        if (j == allSongs.Count() && !done)
+                        switch (fails)
                         {
-                            fail = true;
-                            tempPlaylist.playlist.Add(new Song("0", " ", "Missing File?", "404 - Failed to load"));
+                            case 0: requiredSong = SONGSPATH + contents[i]; break;
+                            case 1: requiredSong = SongFolder1 + contents[i]; break;
+                            case 2: requiredSong = SongFolder2 + contents[i]; break;
+                            case 3: requiredSong = SongFolder3 + contents[i]; break;
+                            case 4: requiredSong = SongFolder4 + contents[i]; break;
                         }
-                        else
+                        while (!done && !fail)
                         {
-                            string currentSong = allSongs[j].ReturnFileName();
-                            if (currentSong == requiredSong)
+                            if (j == allSongs.Count() && !done)
                             {
-                                tempPlaylist.addSong(allSongs[j]);
-                                done = true;
+                                fail = true;
+                                fails++;
                             }
-                            j++;
+                            else
+                            {
+                                string currentSong = allSongs[j].ReturnFileName();
+                                if (currentSong == requiredSong)
+                                {
+                                    tempPlaylist.addSong(allSongs[j]);
+                                    done = true;
+                                }
+                                j++;
+                            }
                         }
                     }
-                }
+                    if (fails >= 4) { tempPlaylist.playlist.Add(new Song("0", " ", "Missing File?", "404 - Failed to load")); }
+                }//DefaultSongFolder
 
                 allPlaylists.Add(tempPlaylist);
             }
@@ -135,7 +148,11 @@ namespace Song_Player
             allSongs.Add(owo);
 
             InitializeComponent();
-            LoadSongs();
+            LoadSongs(SONGSPATH);
+            try { LoadSongs(SongFolder1.Text); } catch { }
+            try { LoadSongs(SongFolder2.Text); } catch { }
+            try { LoadSongs(SongFolder3.Text); } catch { }
+            try { LoadSongs(SongFolder4.Text); } catch { }
             LoadPlaylists();
             UpdatePlaylistList();
             UpdatePlaylistDisplay();

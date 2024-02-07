@@ -9,16 +9,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Files\DefaultResources\playlist.png" />
+    <None Remove="Files\DefaultResources\song.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="C:\Users\Triple\Pictures\playlist.png" Link="Files\DefaultResources\playlist.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Files\DefaultResources\" />
     <Folder Include="Files\Playlists\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Files\DefaultResources\playlist.png" />
+    <Resource Include="Files\DefaultResources\song.png">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

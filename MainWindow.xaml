@@ -21,6 +21,9 @@
             <Setter Property="BorderBrush" Value="#FF25022B"/>
             <Setter Property="Foreground" Value="White"/>
         </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0 2 0 2"/>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -98,21 +101,43 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    
+
                     <!-- Song Info -->
                     <StackPanel Margin="5 5 5 5">
                         <TextBlock Text="Song Info" FontSize="16" FontWeight="Bold"/>
                     </StackPanel>
-                    
+
                     <!-- Song Uploader -->
-                    <StackPanel Grid.Row="1">
-                        <TextBlock Text="Song Uploader" FontSize="16" FontWeight="Bold"/>
+                    <StackPanel Grid.Row="1" Margin="5">
+                        <TextBlock Text="Song Uploader" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
+                        <TextBlock Text="Add song folders here:"/>
+                        <TextBox Name="SongFolder1"/>
+                        <TextBox Name="SongFolder2"/>
+                        <TextBox Name="SongFolder3"/>
+                        <TextBox Name="SongFolder4"/>
+                        <TextBlock Text=""/>
+                        <TextBlock Text="Upload songs directly:"/>
+                        <StackPanel Background="Gray" Height="50" Width="220">
+                            <TextBlock Text="Drop Song Here" HorizontalAlignment="Center" Foreground="LightGray"/>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
 
             </Grid>
         </Border>
         <!-- Player Controls -->
-        <Rectangle Name="PlayerControlsCol" Grid.Row="1" Fill="Black"/>
+        <Rectangle Grid.Row="1" Fill="Black"/>
+        <StackPanel Name="PlayerControls" Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" Margin="10">
+            <Button Name="PreviousTrack_Button" Content="&lt;--" Margin="5 0 5 0"/>
+            <Button Name="Play_Button" Content="||" Margin="5 0 5 0"/>
+            <Button Name="SkipTrack_Button" Content="--&gt;" Margin="5 0 5 0"/>
+        </StackPanel>
+        <StackPanel Name="SongData_Small" Orientation="Horizontal" Grid.Row="1" Margin="5">
+            <Image Source="/Files/DefaultResources/song.png" Margin="0 0 5 0"/>
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <TextBlock Name="SongName_Small" Text="Song Name" Margin="0 0 0 5"/>
+                <TextBlock Name="SongArtist_Small" Text="Song Artist" Margin="0 5 0 0"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>
