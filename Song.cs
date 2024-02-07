@@ -14,7 +14,7 @@ namespace Song_Player
         public string artist;   //Artist, input by user.
         public float length;      //In seconds
 
-        public Song(string Length = "0", string FileName = "Track", string Artist = "Artist", string Title = "Title") 
+        public Song(string Length = "0", string FileName = "Track", string? Artist = null, string? Title = null) 
         {
             this.title = (Title == null) ? "Unknown Track" : Title;
             this.artist = (Artist == null) ? "Unknown Artist" : Artist;
