@@ -13,6 +13,7 @@ namespace Song_Player
         public Song activeSong = new Song();
         private Playlist activePlaylist = new Playlist();
         private int activeSongIndex = 0;
+        public bool isPlaying { get; protected set; }
 
         public void LoadAudio(string path = "", int index = -1)
         {
@@ -34,10 +35,11 @@ namespace Song_Player
 
         public void PlayAudio(bool play)
         {
+            player.Pause();
             switch (play)
             {
-                case true: player.Play(); break;
-                case false: player.Pause(); break;
+                case true: player.Play(); isPlaying = true; break;
+                case false: player.Pause(); isPlaying = false; break;
             }
             activeSong = activePlaylist.playlist[activeSongIndex];
         }
@@ -48,11 +50,32 @@ namespace Song_Player
                 case true: activeSongIndex++; break;
                 case false: activeSongIndex--; break;
             }
-
-            activeSong = activePlaylist.playlist[activeSongIndex];
-            Uri uri = new Uri(activeSong.ReturnFileName());
-            player.Open(uri);
-            PlayAudio(true);
+            try {
+                activeSong = activePlaylist.playlist[activeSongIndex];
+                Uri uri = new Uri(activeSong.ReturnFileName());
+                player.Open(uri);
+                PlayAudio(true);
+            }//If this fails, it means it has reached the end of a playlist, so the catch loops it back round to the start, or end, of the PL.
+            catch
+            {
+                switch (forward)
+                {
+                    case true: activeSongIndex = 0; break;
+                    case false: activeSongIndex = activePlaylist.playlist.ToArray().Length - 1; break;
+                }
+                try
+                {
+                    activeSong = activePlaylist.playlist[activeSongIndex];
+                }//If this fails it means there is nothing selected to play at the moment. So it does nothing.
+                catch { }
+                try
+                {
+                    Uri uri = new Uri(activeSong.ReturnFileName());
+                    player.Open(uri);
+                    PlayAudio(true);
+                }//If this fails at any point it is trying to play a song where the audio file is missing in a playlist. The catch pauses any audio.
+                catch { PlayAudio(false); }
+            }
         }
     }
 }
