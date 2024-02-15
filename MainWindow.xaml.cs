@@ -14,6 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TagLib;
+using System.DirectoryServices.ActiveDirectory;
+using System.Reflection;
 
 namespace Song_Player
 {
@@ -34,7 +36,7 @@ namespace Song_Player
         private string SONGSPATH = "D:/VS/Song Player/Files/Songs/";
         private string PLPATH = "D:/VS/Song Player/Files/Playlists/";
 
-        //Utilities
+        #region Utilities
         private string removeStrFromStart(string basic, string toRemove)
         {
             List<char> temp = new List<char>();
@@ -49,78 +51,77 @@ namespace Song_Player
             }
             return new string(temp.ToArray());
         }
-
-        //Song Stuffs
-        private void LoadSongs(string path)
+        private void FixFilePath(ref string path)
         {
-            foreach (string filename in Directory.GetFiles(path, "*.mp3"))
+            List<char> newPath = new List<char>();
+            foreach (char i in path)
             {
-                var mp3 = TagLib.File.Create(filename);
-                string tempTitle = (mp3.Tag.Title != null) ? mp3.Tag.Title : removeStrFromStart(filename, SONGSPATH);
-                string tempAuthor = mp3.Tag.FirstAlbumArtist;
-                string tempLength = mp3.Tag.Length;
-
-                allSongs.Add(new Song(tempLength, filename, tempAuthor, tempTitle));
+                if (i == '\\') { newPath.Add('/'); }
+                else { newPath.Add(i); }
             }
+            path = "";
+            for(int i = 0; i < newPath.Count; i++)
+            {
+                path += newPath[i];
+            }
+            
         }
+        #endregion
 
-        //Playlist Stuffs
+        #region Song Stuffs
+        private void LoadSongs(string path, bool clear = true)
+        {
+            if (clear) { allSongs.Clear(); }
+            FixFilePath(ref path);
+            try {
+                foreach (string filename in Directory.GetFiles(path, "*.mp3"))
+                {
+                    var mp3 = TagLib.File.Create(filename);
+                    string tempTitle = (mp3.Tag.Title != null) ? mp3.Tag.Title : removeStrFromStart(filename, path);
+                    string tempAuthor = mp3.Tag.FirstAlbumArtist;
+                    string tempLength = mp3.Tag.Length;
+
+                    tempTitle = (tempTitle[0] == '\\') ? removeStrFromStart(tempTitle, "\\"): tempTitle;
+
+                    allSongs.Add(new Song(tempLength, filename, tempAuthor, tempTitle));
+                }
+            }catch { }
+        }
+        #endregion
+
+        #region Playlist Stuffs
         private void LoadPlaylists()
         {
-            List<string> loadedPlaylists = new List<string>();
-            foreach (string filename in Directory.GetFiles(PLPATH))
+            allPlaylists.Clear();
+
+            foreach (string file in Directory.GetFiles(PLPATH))
             {
-                string[] contents = System.IO.File.ReadAllText(filename).Split("~");
-                string tempName = contents[0];
-                string tempAuthor = contents[1];
+                string[] content = System.IO.File.ReadAllText(file).Split("~");
+                Playlist tempPlaylist = new Playlist(file, content[0], content[1]); //Make a temporary playlist to build with.
 
-                Playlist tempPlaylist = new Playlist(filename, tempName, tempAuthor);
-
-                for (int i = 2; i < contents.Count(); i++)
+                for (int i = 2; i < content.Length; i++)
                 {
-                    bool fail = false;
-                    int fails = 0;
-                    bool done = false;
                     int j = 0;
-                    string requiredSong = "";
-                    while (fails < 5 && !done)
+                    bool done = false;
+                    while (j < allSongs.Count && !done)
                     {
-                        fail = false;
-                        switch (fails)
+                        if (content[i] == allSongs[j].title)
                         {
-                            case 0: requiredSong = SONGSPATH + contents[i]; break;
-                            case 1: requiredSong = SongFolder1 + contents[i]; break;
-                            case 2: requiredSong = SongFolder2 + contents[i]; break;
-                            case 3: requiredSong = SongFolder3 + contents[i]; break;
-                            case 4: requiredSong = SongFolder4 + contents[i]; break;
-                        }
-                        while (!done && !fail)
-                        {
-                            if (j == allSongs.Count() && !done)
-                            {
-                                fail = true;
-                                fails++;
-                            }
-                            else
-                            {
-                                string currentSong = allSongs[j].ReturnFileName();
-                                if (currentSong == requiredSong)
-                                {
-                                    tempPlaylist.addSong(allSongs[j]);
-                                    done = true;
-                                }
-                                j++;
-                            }
-                        }
+                            done = true;
+                            tempPlaylist.addSong(allSongs[j]);
+                        }//Song found in allSongs
+                        j++;
                     }
-                    if (fails >= 4) { tempPlaylist.playlist.Add(new Song("0", " ", "Missing File?", "404 - Failed to load")); }
-                }//DefaultSongFolder
+                    if (!done && content[i] != "#") { tempPlaylist.addSong(new Song("0", "", " - File Missing ?", "404")); }
+                }//One loop per song, takes full filepath and tries to locate in allSongs. If not there, placeholder song added.
 
                 allPlaylists.Add(tempPlaylist);
-            }
+                
+            }//One loop for each playlist file.
         }
         private void UpdatePlaylistDisplay()
         {
+            LoadPlaylists();
             activePlaylist = allPlaylists[activePlaylistIndex];
             SongList_PlaylistPanel.Text = "";
 
@@ -133,14 +134,16 @@ namespace Song_Player
         }
         private void UpdatePlaylistList()
         {
+            LoadPlaylists();
             PlaylistList_Panel.Text = "\n";
             for (int i = 0; i < allPlaylists.Count; i++)
             {
                 PlaylistList_Panel.Text += allPlaylists[i].name + "\n\n";
             }
         }
+        #endregion
 
-        //Player controls
+        #region Player controls
         private void SelectPlaylist(bool all = false)
         {
             switch (all)
@@ -171,6 +174,7 @@ namespace Song_Player
             SongName_Small.Text = player.activeSong.title;
             SongArtist_Small.Text = player.activeSong.artist;
         }
+        #endregion
 
         //Main
         public MainWindow()
@@ -179,25 +183,29 @@ namespace Song_Player
             allSongs.Add(owo);
 
             InitializeComponent();
-            LoadSongs(SONGSPATH);
-            try { LoadSongs(SongFolder1.Text); } catch { }
-            try { LoadSongs(SongFolder2.Text); } catch { }
-            try { LoadSongs(SongFolder3.Text); } catch { }
-            try { LoadSongs(SongFolder4.Text); } catch { }
+            RefreshPress(true);
             LoadPlaylists();
             UpdatePlaylistList();
             UpdatePlaylistDisplay();
         }
 
-        //UI Elements/Buttons
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        #region UI Elements/Buttons
+        private void RefreshPress(bool onlySongs = false)
         {
-            AllSongs_Panel.Text = "";
-            for (int i = 0; i < allSongs.Count; i++)
+            LoadSongs(SONGSPATH);
+            LoadSongs(SongFolder1.Text, false);
+            LoadSongs(SongFolder2.Text, false);
+            LoadSongs(SongFolder3.Text, false);
+            LoadSongs(SongFolder4.Text, false);
+            if (!onlySongs)
             {
-                AllSongs_Panel.Text = AllSongs_Panel.Text + allSongs[i].title + " || " + allSongs[i].artist + " | " + (Math.Round(allSongs[i].length / 60,2)).ToString() + ":00\n";
+                AllSongs_Panel.Text = "";
+                for (int i = 0; i < allSongs.Count; i++)
+                {
+                    AllSongs_Panel.Text = AllSongs_Panel.Text + allSongs[i].title + " || " + allSongs[i].artist + " | " + (Math.Round(allSongs[i].length / 60, 2)).ToString() + ":00\n";
+                }
+                UpdatePlaylistDisplay();
             }
-            UpdatePlaylistDisplay();
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -242,6 +250,25 @@ namespace Song_Player
         private void PlayButton_AllSongs_Click(object sender, RoutedEventArgs e)
         {
             SelectPlaylist(true);
+        }
+        private void Play_Button_Click(object sender, RoutedEventArgs e)
+        {
+            switch (player.isPlaying)
+            {
+                case false:
+                    try { Play(true); }
+                    catch { try { SelectPlaylist(); } catch { SelectPlaylist(true); } }//If no song selected, load active playlist and try again, if no active playlist, load all songs and try again.
+                    break;
+                case true:
+                    try { Play(false); } catch { };
+                    break;
+            }
+            
+        }
+        #endregion
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshPress();
         }
     }
 }

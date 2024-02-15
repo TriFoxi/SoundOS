@@ -13,6 +13,7 @@ namespace Song_Player
         public Song activeSong = new Song();
         private Playlist activePlaylist = new Playlist();
         private int activeSongIndex = 0;
+        public bool isPlaying { get; protected set; }
 
         public void LoadAudio(string path = "", int index = -1)
         {
@@ -37,8 +38,8 @@ namespace Song_Player
             player.Pause();
             switch (play)
             {
-                case true: player.Play(); break;
-                case false: player.Pause(); break;
+                case true: player.Play(); isPlaying = true; break;
+                case false: player.Pause(); isPlaying = false; break;
             }
             activeSong = activePlaylist.playlist[activeSongIndex];
         }
