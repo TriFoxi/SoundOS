@@ -12,7 +12,7 @@ namespace Song_Player
         private string filename;    //file location override possible by user
         public string title;     //Song name, from filename or user override
         public string artist;   //Artist, input by user.
-        public float length;      //In seconds
+        public string length;      //In minutes
 
         public Song(string Length = "0", string FileName = "Track", string? Artist = null, string? Title = null) 
         {
@@ -21,10 +21,13 @@ namespace Song_Player
             this.filename = FileName;
             try
             {
-                this.length = int.Parse(Length);
+                int lseconds = int.Parse(Length) / 1000;
+                int lminutes = lseconds / 60;
+                lseconds = lseconds % 60;
+                this.length = lminutes.ToString() + ":" + lseconds.ToString();
             }catch(Exception) 
             {
-                this.length = 0;
+                this.length = "0:00";
             }
         }
 

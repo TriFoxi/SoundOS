@@ -26,7 +26,7 @@ namespace Song_Player
         public void addSong(Song song)
         {
             this.playlist.Add(song);
-            this.playtime += song.length;
+            this.playtime += int.Parse(song.length.Split(':')[0]);
         }
     }
 }
