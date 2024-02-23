@@ -111,7 +111,18 @@
 
                     <!-- Song Info -->
                     <StackPanel Margin="5 5 5 5">
-                        <TextBlock Text="Song Info" FontSize="16" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Name="SongInfo_Name" Text="Song Name" FontSize="16" FontWeight="Bold"/>
+                            <Button Name="SongInfo_Edit_Title" Content="✒️" Margin="5 0 5 0" Click="SongInfo_Edit_Title_Click"/>
+                            <TextBox Name="SongInfo_Edit_Title_Input" Width="100"/>
+                            <Button Name="SongInfo_Edit_Title_Confirmation" Content="✅" Margin="5 0 5 0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Name="SongInfo_Author" Text="Song Author"/>
+                            <Button Name="SongInfo_Edit_Artist" Content="✒️" Margin="5 0 5 0" Click="SongInfo_Edit_Artist_Click"/>
+                            <TextBox Name="SongInfo_Edit_Artist_Input" Width="100"/>
+                            <Button Name="SongInfo_Edit_Artist_Confirmation" Content="✅" Margin="5 0 5 0"/>
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Song Uploader -->
@@ -136,7 +147,7 @@
         <Rectangle Grid.Row="1" Fill="Black"/>
         <StackPanel Name="PlayerControls" Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" Margin="10">
             <Button Name="PreviousTrack_Button" Content="&lt;--" Margin="5 0 5 0" Click="PreviousTrack_Button_Click"/>
-            <Button Name="Play_Button" Content="||" Margin="5 0 5 0"/>
+            <Button Name="Play_Button" Content="||" Margin="5 0 5 0" Click="Play_Button_Click"/>
             <Button Name="SkipTrack_Button" Content="--&gt;" Margin="5 0 5 0" Click="SkipTrack_Button_Click"/>
         </StackPanel>
         <StackPanel Name="SongData_Small" Orientation="Horizontal" Grid.Row="1" Margin="5">

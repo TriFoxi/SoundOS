@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using TagLib;
 using System.DirectoryServices.ActiveDirectory;
 using System.Reflection;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Song_Player
 {
@@ -78,7 +79,7 @@ namespace Song_Player
                 {
                     var mp3 = TagLib.File.Create(filename);
                     string tempTitle = (mp3.Tag.Title != null) ? mp3.Tag.Title : removeStrFromStart(filename, path);
-                    string tempAuthor = mp3.Tag.FirstAlbumArtist;
+                    string tempAuthor = mp3.Tag.FirstPerformer;
                     string tempLength = mp3.Tag.Length;
 
                     tempTitle = (tempTitle[0] == '\\') ? removeStrFromStart(tempTitle, "\\"): tempTitle;
@@ -127,7 +128,7 @@ namespace Song_Player
 
             for (int i = 0; i < activePlaylist.playlist.Count; i++)
             {
-                SongList_PlaylistPanel.Text = SongList_PlaylistPanel.Text + activePlaylist.playlist[i].title + " || " + activePlaylist.playlist[i].artist + " | " + (Math.Round(activePlaylist.playlist[i].length / 60, 2)).ToString() + ":00\n";
+                SongList_PlaylistPanel.Text = SongList_PlaylistPanel.Text + activePlaylist.playlist[i].title + " || " + activePlaylist.playlist[i].artist + " | " + (activePlaylist.playlist[i].length).ToString() + "\n";
             }
             PlaylistName_Panel.Text = activePlaylist.name;
             PlaylistAuthor_Panel.Text = activePlaylist.author;
@@ -166,24 +167,67 @@ namespace Song_Player
         }
         private void SwitchTrack(bool forward)
         {
-            player.TrackSwitch(forward);
-            LoadActiveSongDetails();
+            try
+            {
+                Song test = player.activeSong;
+                player.TrackSwitch(forward);
+                LoadActiveSongDetails();
+            }
+            catch { }//Doesn't run if no playlist is currently loaded
         }
+        #endregion
+
+        #region Song information
         private void LoadActiveSongDetails()
         {
             SongName_Small.Text = player.activeSong.title;
             SongArtist_Small.Text = player.activeSong.artist;
+
+            SongInfo_Name.Text = player.activeSong.title;
+            SongInfo_Author.Text = player.activeSong.artist;
+        }
+        private void EditSongTags(string value, string tagField)
+        {
+
+        }
+        private void ShowEditFieldInputs(string tagField)
+        {
+            //is a toggle
+            switch (tagField)
+            {
+                case "Title": 
+                    if (SongInfo_Edit_Title_Input.Visibility == Visibility.Visible)
+                    {
+                        SongInfo_Edit_Title_Input.Visibility = Visibility.Hidden;
+                        SongInfo_Edit_Title_Confirmation.Visibility = Visibility.Hidden;
+                    }
+                    else
+                    {
+                        SongInfo_Edit_Title_Input.Visibility = Visibility.Visible;
+                        SongInfo_Edit_Title_Confirmation.Visibility = Visibility.Visible;
+                    }
+                    break;
+                case "Artist":
+                    if (SongInfo_Edit_Artist_Input.Visibility == Visibility.Visible)
+                    {
+                        SongInfo_Edit_Artist_Input.Visibility = Visibility.Hidden;
+                        SongInfo_Edit_Artist_Confirmation.Visibility = Visibility.Hidden;
+                    }
+                    else
+                    {
+                        SongInfo_Edit_Artist_Input.Visibility = Visibility.Visible;
+                        SongInfo_Edit_Artist_Confirmation.Visibility = Visibility.Visible;
+                    }
+                    break;
+            }
         }
         #endregion
 
         //Main
         public MainWindow()
         {
-            Song owo = new Song();
-            allSongs.Add(owo);
-
             InitializeComponent();
-            RefreshPress(true);
+            RefreshPress();
             LoadPlaylists();
             UpdatePlaylistList();
             UpdatePlaylistDisplay();
@@ -202,7 +246,7 @@ namespace Song_Player
                 AllSongs_Panel.Text = "";
                 for (int i = 0; i < allSongs.Count; i++)
                 {
-                    AllSongs_Panel.Text = AllSongs_Panel.Text + allSongs[i].title + " || " + allSongs[i].artist + " | " + (Math.Round(allSongs[i].length / 60, 2)).ToString() + ":00\n";
+                    AllSongs_Panel.Text = AllSongs_Panel.Text + allSongs[i].title + " || " + allSongs[i].artist + " | " + (allSongs[i].length).ToString() + "\n";
                 }
                 UpdatePlaylistDisplay();
             }
@@ -237,6 +281,7 @@ namespace Song_Player
         }//Previous Playlist Button
         private void PlayPlaylist_Click(object sender, RoutedEventArgs e)
         {
+            RefreshPress();
             SelectPlaylist();
         }
         private void SkipTrack_Button_Click(object sender, RoutedEventArgs e)
@@ -265,11 +310,19 @@ namespace Song_Player
             }
             
         }
-        #endregion
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             RefreshPress();
         }
+        private void SongInfo_Edit_Title_Click(object sender, RoutedEventArgs e)
+        {
+            ShowEditFieldInputs("Title");
+        }
+        private void SongInfo_Edit_Artist_Click(object sender, RoutedEventArgs e)
+        {
+            ShowEditFieldInputs("Artist");
+        }
+        #endregion
     }
 }
 //BONK <3
